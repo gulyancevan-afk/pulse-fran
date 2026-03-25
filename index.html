@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Монитор Франчайзи 1С</title>
+    <style>
+        /* === Дизайн-система === */
+        :root {
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --accent-blue: #2563eb;
+            --accent-green: #059669;
+            --accent-red: #dc2626;
+            --border-radius: 16px;
+            --brand-red: #d91920;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+        }
+
+        .container { max-width: 1200px; width: 100%; }
+
+        header {
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 3px solid var(--brand-blue); /* Красная обводка */
+        }
+
+        /* Логотип по центру */
+        .header-logo {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Стиль для картинки-логотипа */
+        .header-logo img {
+            height: 40px; /* Фиксированная высота, как у текста */
+            width: auto;
+            object-fit: contain;
+        }
+
+        h1 { font-size: 24px; margin: 0; font-weight: 700; }
+        .meta-info { text-align: right; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+            header { flex-direction: column; gap: 15px; }
+            .header-logo { order: -1; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-date {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .metric-row:last-child { border-bottom: none; }
+
+        .metric-label { font-size: 14px; color: var(--text-muted); }
+        .metric-value { font-size: 18px; font-weight: 700; }
+
+        .val-negative { color: var(--accent-red); background: rgba(220, 38, 38, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 16px; }
+        .val-positive { color: var(--accent-green); }
+
+        /* Карточка Рынка */
+        .market-card-list {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 5px solid var(--accent-blue);
+        }
+
+        .market-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 16px;
+        }
+        .market-metric:last-child { border-bottom: none; }
+        
+        .market-metric-label { color: var(--text-main); font-weight: 500; }
+        .market-metric-value { font-weight: 700; font-size: 18px; }
+        
+        .verdict-text { 
+            margin-top: 15px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .verdict-good { background: #ecfdf5; color: #065f46; }
+        .verdict-bad { background: #fef2f2; color: #991b1b; }
+
+        .loader { text-align: center; padding: 50px; color: var(--text-muted); grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <!-- ЛЕВАЯ ЧАСТЬ: Заголовок -->
+        <div style="flex: 1;">
+            <h1>Онлайн Монитор</h1>
+            <div style="font-size: 14px; color: var(--text-muted); margin-top: 5px;">Панель управления франчайзи</div>
+        </div>
+
+        <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ: Логотип -->
+        <div class="header-logo">
+            <!-- Заменен на логотип из вложения -->
+            <img src="https://z-cdn-media.chatglm.cn/files/d7966553-d7f8-4cbc-8c1e-07bbc4a628e5.png?auth_key=1874428207-f45494df113d4e76abcb11cfc11b3dcc-0-3cb3d7da56d484b7be3f652c6893baf4" alt="Logo">
+        </div>
+
+        <!-- ПРАВАЯ ЧАСТЬ: Дата -->
+        <div class="meta-info" style="flex: 1; text-align: right;">
+            <div id="report-date">Загрузка...</div>
+            <div id="update-time">Обновлено: --:--</div>
+        </div>
+    </header>
+
+    <div class="grid" id="dashboard-content">
+        <div class="loader">Получение данных...</div>
+    </div>
+</div>
+
+<script>
+    // === КОНФИГУРАЦИЯ ===
+    const SHEET_KEY = '2PACX-1vRN2TuUo6dKj8YIoyKnueGXNTy9e4lKKU9RkU8vVoTQc4F9LEW1W_pBAqTau70-X0z6mrO1lZEAWrqX';
+    const DATA_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/pub?output=csv`;
+
+    const KEYS = {
+        its_base: 'на продлении',
+        its_renewed: 'продлено',
+        its_growth: 'рост итс',
+        its_new: 'новых итс',
+        fresh_new: 'новых клиентов fresh',
+        fresh_lost: 'не продлено fresh',
+        fresh_growth: 'рост fresh',
+        fresh_q_growth: 'квартальный рост fresh',
+        left_to_renew: 'осталось продлить',
+        market_our_its: 'наше количество итс',
+        market_rf_growth: 'темпы роста по рф',
+        market_our_growth: 'темпы роста наши'
+    };
+
+    const MONTHS = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
+    
+    // === ЛОГИКА ===
+    
+    function parseCSV(str) {
+        const rows = str.split('\n');
+        const firstLine = rows[0];
+        const delimiter = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+
+        return rows.map(row => {
+            let arr = [];
+            let quote = false;
+            let col = '';
+            for (let c of row) {
+                if (c === '"') quote = !quote;
+                else if (c === delimiter && !quote) { arr.push(col.trim()); col = ''; }
+                else col += c;
+            }
+            arr.push(col.trim());
+            return arr;
+        });
+    }
+
+    function findRowIndex(rows, keyword) {
+        return rows.findIndex(r => r[0] && String(r[0]).toLowerCase().includes(keyword));
+    }
+
+    function toNum(val) {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        return parseFloat(String(val).replace('%', '').replace(',', '.').replace(/\s/g, '')) || 0;
+    }
+
+    function findItsCol(rows, targetMonthName) {
+        let lastHeaderRowIndex = -1;
+        for (let i = rows.length - 1; i >= 0; i--) {
+             if (rows[i].some(cell => MONTHS.some(m => String(cell).toLowerCase().includes(m)))) {
+                 lastHeaderRowIndex = i;
+                 break;
+             }
+        }
+        if (lastHeaderRowIndex !== -1) {
+            const headers = rows[lastHeaderRowIndex];
+            let colIdx = headers.findIndex(h => String(h).toLowerCase().includes(targetMonthName));
+            if (colIdx !== -1) return colIdx;
+            return headers.length - 1;
+        }
+        return -1;
+    }
+
+    function findMarketCol(rows, targetMonthName) {
+        let headerRowIndex = -1;
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].some(cell => MONTHS.some(m => String(cell).toLowerCase().includes(m)))) {
+                headerRowIndex = i;
+                break;
+            }
+        }
+        if (headerRowIndex === -1) return -1;
+        const headers = rows[headerRowIndex];
+        let colIdx = headers.findIndex(h => String(h).toLowerCase().includes(targetMonthName));
+        return colIdx; 
+    }
+
+    function getVal(rows, rIdx, cIdx) {
+        if (rIdx === -1 || cIdx === -1) return 0;
+        return rows[rIdx][cIdx] || 0;
+    }
+
+    async function initDashboard() {
+        try {
+            const response = await fetch(DATA_URL);
+            if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
+            
+            const text = await response.text();
+            const rows = parseCSV(text);
+            
+            const now = new Date();
+            const currMonthIdx = now.getMonth(); 
+            const prevMonthIdx = (currMonthIdx === 0 ? 11 : currMonthIdx - 1); 
+            const prevMonthName = MONTHS[prevMonthIdx]; 
+            const currMonthName = MONTHS[currMonthIdx];
+
+            // --- 1. ИТС И ФРЕШ ---
+            const idxBase = findRowIndex(rows, KEYS.its_base);
+            const idxRenew = findRowIndex(rows, KEYS.its_renewed);
+            const idxGrowth = findRowIndex(rows, KEYS.its_growth);
+            const idxNew = findRowIndex(rows, KEYS.its_new);
+            
+            const idxFreshNew = findRowIndex(rows, KEYS.fresh_new);
+            const idxFreshLost = findRowIndex(rows, KEYS.fresh_lost);
+            const idxFreshGrowth = findRowIndex(rows, KEYS.fresh_growth);
+            const idxFreshQGrowth = findRowIndex(rows, KEYS.fresh_q_growth);
+
+            let itsPrevCol = findItsCol(rows, prevMonthName);
+            let itsCurrCol = findItsCol(rows, currMonthName);
+
+            const itsBasePrev = getVal(rows, idxBase, itsPrevCol);
+            const itsRenewPrev = getVal(rows, idxRenew, itsPrevCol);
+            const itsGrowthPrev = getVal(rows, idxGrowth, itsPrevCol);
+            const itsNewPrev = getVal(rows, idxNew, itsPrevCol); 
+
+            const itsBaseCurr = getVal(rows, idxBase, itsCurrCol);
+            const itsRenewCurr = getVal(rows, idxRenew, itsCurrCol);
+            const itsGrowthCurr = getVal(rows, idxGrowth, itsCurrCol);
+            
+            let leftToRenew = getVal(rows, findRowIndex(rows, KEYS.left_to_renew), itsCurrCol);
+            if (!leftToRenew || leftToRenew === 0) {
+                leftToRenew = toNum(itsBaseCurr) - toNum(itsRenewCurr);
+            }
+
+            const freshNew = getVal(rows, idxFreshNew, itsCurrCol);
+            const freshLost = getVal(rows, idxFreshLost, itsCurrCol);
+            const freshGrowth = getVal(rows, idxFreshGrowth, itsCurrCol);
+            const freshQGrowth = getVal(rows, idxFreshQGrowth, itsCurrCol);
+
+            // --- 2. РЫНОК ---
+            let marketCol = findMarketCol(rows, prevMonthName);
+            if (marketCol === -1) marketCol = findMarketCol(rows, currMonthName);
+            if (marketCol === -1) {
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].length > 1) { marketCol = rows[i].length - 1; break; }
+                }
+            }
+
+            const idxOurITS = findRowIndex(rows, KEYS.market_our_its);
+            const idxRfGrowth = findRowIndex(rows, KEYS.market_rf_growth);
+            const idxOurGrowth = findRowIndex(rows, KEYS.market_our_growth);
+
+            const valOurITS = getVal(rows, idxOurITS, marketCol);
+            const valRfGrowth = getVal(rows, idxRfGrowth, marketCol);
+            const valOurGrowth = getVal(rows, idxOurGrowth, marketCol);
+
+            const nIts = toNum(valOurITS);
+            const nRf = toNum(valRfGrowth);
+            const nOur = toNum(valOurGrowth);
+            const diffVal = nOur - nRf;
+
+            renderUI({
+                itsPrev: { base: itsBasePrev, renew: itsRenewPrev, growth: itsGrowthPrev, new: itsNewPrev },
+                itsCurr: { base: itsBaseCurr, renew: itsRenewCurr, growth: itsGrowthCurr, left: leftToRenew },
+                fresh: { new: freshNew, lost: freshLost, growth: freshGrowth, qGrowth: freshQGrowth },
+                market: { 
+                    its: nIts, 
+                    rf: nRf, 
+                    our: nOur,
+                    diff: diffVal
+                }
+            });
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="loader" style="color:red; grid-column: 1/-1;">
+                    Ошибка доступа к данным.<br>
+                    <small>${err}</small>
+                </div>`;
+        }
+    }
+
+    function renderUI(data) {
+        const now = new Date();
+        const monthNamesFull = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+        
+        document.getElementById('report-date').innerText = `Сегодня: ${now.getDate()} ${monthNamesFull[now.getMonth()]}`;
+        document.getElementById('update-time').innerText = `Обновлено: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const prevMonthTitle = monthNamesFull[(now.getMonth() === 0 ? 11 : now.getMonth() - 1)];
+        const currMonthTitle = monthNamesFull[now.getMonth()];
+
+        const n = (v) => toNum(v);
+        const fmt = (v) => { let num = n(v); return num > 0 ? '+'+num : num; };
+        const cls = (v) => n(v) < 0 ? 'val-negative' : 'val-positive';
+
+        const fmtPct = (v) => v.toFixed(2) + '%';
+        const marketCls = data.market.diff >= 0 ? 'val-positive' : 'val-negative';
+        const verdictCls = data.market.diff >= 0 ? 'verdict-good' : 'verdict-bad';
+        const verdictText = data.market.diff >= 0 
+            ? `🚀 Мы опережаем рынок на ${data.market.diff.toFixed(2)}%` 
+            : `🐢 Мы отстаем от рынка на ${Math.abs(data.market.diff).toFixed(2)}%`;
+
+        document.getElementById('dashboard-content').innerHTML = `
+            <!-- 1. ИТС Прошлый месяц -->
+            <div class="card">
+                <div class="card-header"><span>📅</span> ИТС: Прошлый месяц</div>
+                <div class="card-date">${prevMonthTitle} ${now.getFullYear()} (Факт)</div>
+                
+                <div class="metric-row">
+                    <span class="metric-label">На продлении</span>
+                    <span class="metric-value">${data.itsPrev.base}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Продлено</span>
+                    <span class="metric-value">${data.itsPrev.renew}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Новых ИТС</span>
+                    <span class="metric-value">${data.itsPrev.new}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label"><strong>Рост</strong></span>
+                    <span class="metric-value ${cls(data.itsPrev.growth)}">${fmt(data.itsPrev.growth)}</span>
+                </div>
+            </div>
+
+            <!-- 2. ИТС Текущий месяц -->
+            <div class="card" style="border-left: 4px solid var(--accent-blue);">
+                <div class="card-header"><span>🔥</span> ИТС: Текущий месяц</div>
+                <div class="card-date">${currMonthTitle} ${now.getFullYear()} (В работе)</div>
+
+                <div class="metric-row">
+                    <span class="metric-label">На продлении</span>
+                    <span class="metric-value">${data.itsCurr.base}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Продлено</span>
+                    <span class="metric-value">${data.itsCurr.renew}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label"><strong>Осталось продлить</strong></span>
+                    <span class="metric-value" style="color: var(--accent-blue)">${data.itsCurr.left}</span>
+                </div>
+                <div class="metric-row" style="background: #f9fafb; margin-top: 10px; padding: 10px; border-radius: 8px;">
+                    <span class="metric-label">Текущий рост</span>
+                    <span class="metric-value ${cls(data.itsCurr.growth)}">${fmt(data.itsCurr.growth)}</span>
+                </div>
+            </div>
+
+            <!-- 3. Фреш -->
+            <div class="card">
+                <div class="card-header"><span>☁️</span> 1С:Фреш</div>
+                <div class="card-date">Текущая динамика</div>
+                
+                <div class="metric-row">
+                    <span class="metric-label">Новых клиентов</span>
+                    <span class="metric-value">${data.fresh.new}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Не продлено</span>
+                    <span class="metric-value" style="color: var(--accent-red)">${data.fresh.lost}</span>
+                </div>
+                <div class="metric-row" style="background: #f9fafb; margin-top: 10px; padding: 10px; border-radius: 8px;">
+                    <span class="metric-label">Текущий рост</span>
+                    <span class="metric-value ${cls(data.fresh.growth)}">${fmt(data.fresh.growth)}</span>
+                </div>
+                <div class="metric-row" style="border-top: 1px solid #e5e7eb; margin-top: 5px; padding-top: 10px;">
+                    <span class="metric-label"><strong>Квартальный Рост</strong></span>
+                    <span class="metric-value ${cls(data.fresh.qGrowth)}">${fmt(data.fresh.qGrowth)}</span>
+                </div>
+            </div>
+
+            <!-- 4. РЫНОК -->
+            <div class="card market-card-list">
+                <div class="card-header"><span>🏆</span> Позиция на рынке</div>
+                <div class="card-date">Данные за ${prevMonthTitle} ${now.getFullYear()}</div>
+
+                <div class="market-metric">
+                    <span class="market-metric-label">Наше количество ИТС</span>
+                    <span class="market-metric-value">${data.market.its}</span>
+                </div>
+                <div class="market-metric">
+                    <span class="market-metric-label">Темпы роста по РФ</span>
+                    <span class="market-metric-value">${fmtPct(data.market.rf)}</span>
+                </div>
+                <div class="market-metric">
+                    <span class="market-metric-label">Темпы роста наши</span>
+                    <span class="market-metric-value ${marketCls}">${fmtPct(data.market.our)}</span>
+                </div>
+
+                <div class="verdict-text ${verdictCls}">
+                    ${verdictText}
+                </div>
+            </div>
+        `;
+    }
+
+    initDashboard();
+    setInterval(initDashboard, 300000);
+</script>
+
+</body>
+</html>
